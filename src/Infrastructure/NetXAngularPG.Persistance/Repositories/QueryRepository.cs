@@ -44,8 +44,6 @@ namespace NetXAngularPG.Persistance.Repositories
             return await query.FirstOrDefaultAsync(predicate);
         }
         public async Task<T> GetByIdAsync(string id, bool tracking = true)
-        //=> await Table.FirstOrDefaultAsync(data => data.Id == Guid.Parse(id));
-        //=> await Table.FindAsync(Guid.Parse(id));
         {
             var query = Table.AsQueryable();
             if (!tracking)
@@ -53,9 +51,6 @@ namespace NetXAngularPG.Persistance.Repositories
             return await query.FirstOrDefaultAsync(data => data.Id == Guid.Parse(id));
         }
 
-        public IQueryable<T> GetAsync(Expression<Func<BaseEntity, bool>> predicate, Func<IQueryable<BaseEntity>, IIncludableQueryable<BaseEntity, object>> include = null)
-        {
-            throw new NotImplementedException();
-        }
+     
     }
 }
