@@ -19,6 +19,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\Core\NetXAngularPG.Application\NetXAngularPG.Application.csproj" />
+      <ProjectReference Include="..\..\Infrastructure\NetXAngularPG.Infrastructure\NetXAngularPG.Infrastructure.csproj" />
       <ProjectReference Include="..\..\Infrastructure\NetXAngularPG.Persistance\NetXAngularPG.Persistance.csproj" />
     </ItemGroup>
 
