@@ -6,16 +6,10 @@ using NetXAngularPG.Persistance;
 var builder = WebApplication.CreateBuilder(args);
 
 
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowAll",
-        builder =>
-        {
-            builder.AllowAnyOrigin()
-                .AllowAnyMethod()
-                .AllowAnyHeader();
-        });
-});
+builder.Services.AddCors(options => options.AddDefaultPolicy(policy =>
+    policy.WithOrigins("http://localhost:4200", "https://localhost:4200").AllowAnyHeader().AllowAnyMethod().AllowCredentials()
+));
+
 
 // Add services to the container.
 builder.Services.AddPersistanceServices();
@@ -35,7 +29,7 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-app.UseCors("AllowAll");
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -44,7 +38,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-
+app.UseCors();
 
 app.UseHttpsRedirection();
 
