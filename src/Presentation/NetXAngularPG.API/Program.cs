@@ -1,5 +1,6 @@
 using FluentValidation.AspNetCore;
 using NetXAngularPG.Domain.Entities;
+using NetXAngularPG.Infrastructure;
 using NetXAngularPG.Infrastructure.Filters;
 using NetXAngularPG.Persistance;
 
@@ -13,6 +14,7 @@ builder.Services.AddCors(options => options.AddDefaultPolicy(policy =>
 
 // Add services to the container.
 builder.Services.AddPersistanceServices();
+builder.Services.AddInfrastructureServices();
 
 
 
