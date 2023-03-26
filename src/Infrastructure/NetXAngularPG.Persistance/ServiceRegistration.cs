@@ -26,6 +26,15 @@ namespace NetXAngularPG.Persistance
             services.AddScoped<IProductCommandRepository,ProductCommandRepository>();
             services.AddScoped<IProductQueryRepository, ProductQueryRepository>();
 
+            services.AddScoped<IFileCommandRepository,FileCommandRepository>();
+            services.AddScoped<IFileQueryRepository, FileQueryRepository>();
+
+            services.AddScoped<IInvoiceFileCommandRepository,InvoiceFileCommandRepository>();
+            services.AddScoped<IInvoiceFileQueryRepository, InvoiceFileQueryRepository>();
+
+            services.AddScoped<IProductImageFileCommandRepository,ProductImageFileCommandRepository>();
+            services.AddScoped<IProductImageFileQueryRepository, ProductImageFileQueryRepository>();
+
         }
     }
 }

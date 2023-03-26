@@ -12,23 +12,42 @@ namespace NetXAngularPG.API.Controllers
 
     [Route("api/[controller]")]
     [ApiController]
-    public class ProductsController : ControllerBase
+    public class ProductController : ControllerBase
     {
         readonly private IProductCommandRepository _productCommandRepository;
         readonly private IProductQueryRepository _productQueryRepository;
         private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly IFileService _fileService;
 
-        public ProductsController(
+        readonly private IFileCommandRepository _fileCommandRepository;
+        readonly private IFileQueryRepository _fileQueryRepository;
+        readonly private IProductImageFileCommandRepository _productImageFileCommandRepository;
+        readonly private IProductImageFileQueryRepository _productImageFileQueryRepository;
+        readonly private IInvoiceFileQueryRepository _invoiceFileQueryRepository;
+        readonly private IInvoiceFileCommandRepository _invoiceFileCommandRepository;
+
+        public ProductController(
             IProductCommandRepository productCommandRepository,
             IProductQueryRepository productQueryRepository,
             IWebHostEnvironment webHostEnvironment,
-            IFileService fileService)
+            IFileService fileService,
+            IFileCommandRepository fileCommandRepository,
+            IFileQueryRepository fileQueryRepository,
+            IProductImageFileCommandRepository productImageFileCommandRepository,
+            IProductImageFileQueryRepository productImageFileQueryRepository,
+            IInvoiceFileQueryRepository invoiceFileQueryRepository,
+            IInvoiceFileCommandRepository invoiceFileCommandRepository)
         {
             _productCommandRepository = productCommandRepository;
             _productQueryRepository = productQueryRepository;
             _webHostEnvironment = webHostEnvironment;
             _fileService = fileService;
+            _fileCommandRepository = fileCommandRepository;
+            _fileQueryRepository = fileQueryRepository;
+            _productImageFileCommandRepository = productImageFileCommandRepository;
+            _productImageFileQueryRepository = productImageFileQueryRepository;
+            _invoiceFileQueryRepository = invoiceFileQueryRepository;
+            _invoiceFileCommandRepository = invoiceFileCommandRepository;
         }
 
         [HttpGet]
@@ -70,6 +89,16 @@ namespace NetXAngularPG.API.Controllers
         public async Task<IActionResult> Upload()
         {
            var result = await _fileService.UploadAsync("resources/product", Request.Form.Files);
+
+
+           await _productImageFileCommandRepository.AddRangeAsync(result.Select(x=> new ProductImageFile() {         
+            FileName=x.fileName,
+            Path = x.path,
+            }).ToList());
+
+            await _productImageFileCommandRepository.SaveAsync();
+
+
             return Ok(result);
         }
 

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NetXAngularPG.Persistance.Contexts;
 
@@ -11,9 +12,11 @@ using NetXAngularPG.Persistance.Contexts;
 namespace NetXAngularPG.Persistance.Migrations
 {
     [DbContext(typeof(NetXAngularPGDbContext))]
-    partial class NetXAngularPGDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230326211705_initialxx")]
+    partial class initialxx
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -61,14 +64,6 @@ namespace NetXAngularPG.Persistance.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Discriminator")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("FileName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Path")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 

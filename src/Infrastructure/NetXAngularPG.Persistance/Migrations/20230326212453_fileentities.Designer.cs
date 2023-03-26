@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NetXAngularPG.Persistance.Contexts;
 
@@ -11,9 +12,11 @@ using NetXAngularPG.Persistance.Contexts;
 namespace NetXAngularPG.Persistance.Migrations
 {
     [DbContext(typeof(NetXAngularPGDbContext))]
-    partial class NetXAngularPGDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230326212453_fileentities")]
+    partial class fileentities
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

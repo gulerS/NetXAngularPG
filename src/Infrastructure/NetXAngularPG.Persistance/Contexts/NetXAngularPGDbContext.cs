@@ -19,6 +19,11 @@ namespace NetXAngularPG.Persistance.Contexts
         public DbSet<Order> Orders { get; set; }
         public DbSet<Customer> Customers { get; set; }
 
+        public DbSet<Domain.Entities.File> Files { get; set; }
+        public DbSet<ProductImageFile> ProductImageFiles { get; set; }
+        public DbSet<InvoiceFile> InvoiceFiles { get; set; }
+
+
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
 
