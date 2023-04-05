@@ -1,11 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using NetXAngularPG.Application.Abstractions.Storage;
 using NetXAngularPG.Application.Repositories;
 using NetXAngularPG.Application.RequestParameters;
-using NetXAngularPG.Application.Services;
 using NetXAngularPG.Domain.Entities;
-using System.IO;
-using System.IO.Pipes;
-using System.Net;
 
 namespace NetXAngularPG.API.Controllers
 {
@@ -17,7 +14,7 @@ namespace NetXAngularPG.API.Controllers
         readonly private IProductCommandRepository _productCommandRepository;
         readonly private IProductQueryRepository _productQueryRepository;
         private readonly IWebHostEnvironment _webHostEnvironment;
-        private readonly IFileService _fileService;
+
 
         readonly private IFileCommandRepository _fileCommandRepository;
         readonly private IFileQueryRepository _fileQueryRepository;
@@ -25,29 +22,32 @@ namespace NetXAngularPG.API.Controllers
         readonly private IProductImageFileQueryRepository _productImageFileQueryRepository;
         readonly private IInvoiceFileQueryRepository _invoiceFileQueryRepository;
         readonly private IInvoiceFileCommandRepository _invoiceFileCommandRepository;
+        readonly private IStorageService _storageService;
 
         public ProductController(
             IProductCommandRepository productCommandRepository,
             IProductQueryRepository productQueryRepository,
             IWebHostEnvironment webHostEnvironment,
-            IFileService fileService,
+
             IFileCommandRepository fileCommandRepository,
             IFileQueryRepository fileQueryRepository,
             IProductImageFileCommandRepository productImageFileCommandRepository,
             IProductImageFileQueryRepository productImageFileQueryRepository,
             IInvoiceFileQueryRepository invoiceFileQueryRepository,
-            IInvoiceFileCommandRepository invoiceFileCommandRepository)
+            IInvoiceFileCommandRepository invoiceFileCommandRepository,
+            IStorageService storageService)
         {
             _productCommandRepository = productCommandRepository;
             _productQueryRepository = productQueryRepository;
             _webHostEnvironment = webHostEnvironment;
-            _fileService = fileService;
+
             _fileCommandRepository = fileCommandRepository;
             _fileQueryRepository = fileQueryRepository;
             _productImageFileCommandRepository = productImageFileCommandRepository;
             _productImageFileQueryRepository = productImageFileQueryRepository;
             _invoiceFileQueryRepository = invoiceFileQueryRepository;
             _invoiceFileCommandRepository = invoiceFileCommandRepository;
+            _storageService = storageService;
         }
 
         [HttpGet]
@@ -88,18 +88,22 @@ namespace NetXAngularPG.API.Controllers
         [HttpPost("[action]")]
         public async Task<IActionResult> Upload()
         {
-           var result = await _fileService.UploadAsync("resources/product", Request.Form.Files);
+            var result = await _storageService.UploadAsync("resources/product", Request.Form.Files);
+            //var result = await _fileService.UploadAsync("resources/product", Request.Form.Files);
 
 
-           await _productImageFileCommandRepository.AddRangeAsync(result.Select(x=> new ProductImageFile() {         
-            FileName=x.fileName,
-            Path = x.path,
+            await _productImageFileCommandRepository.AddRangeAsync(result.Select(x => new ProductImageFile()
+            {
+                FileName = x.fileName,
+                Path = x.pathOrContainerName,
+                Storage = _storageService.StorageName
             }).ToList());
 
             await _productImageFileCommandRepository.SaveAsync();
 
 
-            return Ok(result);
+            // return Ok(result);
+            return Ok();
         }
 
     }

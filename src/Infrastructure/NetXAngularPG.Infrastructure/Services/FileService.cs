@@ -1,16 +1,10 @@
 ﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using NetXAngularPG.Application.Services;
 using NetXAngularPG.Infrastructure.Operations;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace NetXAngularPG.Infrastructure.Services
 {
-    public class FileService : IFileService
+    public class FileService 
     {
         private readonly IWebHostEnvironment _webHostEnvironment;
         public FileService(IWebHostEnvironment webHostEnvironment)

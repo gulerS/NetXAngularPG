@@ -2,6 +2,7 @@ using FluentValidation.AspNetCore;
 using NetXAngularPG.Domain.Entities;
 using NetXAngularPG.Infrastructure;
 using NetXAngularPG.Infrastructure.Filters;
+using NetXAngularPG.Infrastructure.Services.Storage.Local;
 using NetXAngularPG.Persistance;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,7 +16,7 @@ builder.Services.AddCors(options => options.AddDefaultPolicy(policy =>
 // Add services to the container.
 builder.Services.AddPersistanceServices();
 builder.Services.AddInfrastructureServices();
-
+builder.Services.AddStorage<LocalStorage>();
 
 
 

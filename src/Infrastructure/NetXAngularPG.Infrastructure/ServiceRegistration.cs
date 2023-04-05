@@ -1,12 +1,8 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using NetXAngularPG.Application.Repositories;
-using NetXAngularPG.Application.Services;
+using NetXAngularPG.Application.Abstractions.Storage;
+using NetXAngularPG.Infrastructure.Enums;
 using NetXAngularPG.Infrastructure.Services;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using NetXAngularPG.Infrastructure.Services.Storage.Local;
 
 namespace NetXAngularPG.Infrastructure
 {
@@ -14,10 +10,34 @@ namespace NetXAngularPG.Infrastructure
     {
         public static void AddInfrastructureServices(this IServiceCollection services)
         {
+            services.AddScoped<IStorageService, StorageService>();
 
-            services.AddScoped<IFileService, FileService>();
-            
 
+
+        }
+
+        public static void AddStorage<T>(this IServiceCollection services) where T : class, IStorage
+        {
+            services.AddScoped<IStorage, T>();
+        }
+
+        public static void AddStorage<T>(this IServiceCollection services, StorageType storageType) where T : class, IStorage
+        {
+            switch (storageType)
+            {
+                case StorageType.Local:
+                    services.AddScoped<IStorage, LocalStorage>();
+                    break;
+                case StorageType.Azure:
+
+                    break;
+                case StorageType.AWS:
+                    break;
+
+                default:
+                    services.AddScoped<IStorage, LocalStorage>();
+                    break;
+            }
         }
     }
 }
