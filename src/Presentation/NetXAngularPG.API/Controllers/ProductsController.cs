@@ -86,23 +86,34 @@ namespace NetXAngularPG.API.Controllers
             return Ok();
         }
         [HttpPost("[action]")]
-        public async Task<IActionResult> Upload()
+        public async Task<IActionResult> Upload(string id)
         {
-            var result = await _storageService.UploadAsync("resources/product", Request.Form.Files);
-            //var result = await _fileService.UploadAsync("resources/product", Request.Form.Files);
+            List<(string fileName, string pathOrContainerName)> result = await _storageService.UploadAsync("photo-images", Request.Form.Files);
 
 
-            await _productImageFileCommandRepository.AddRangeAsync(result.Select(x => new ProductImageFile()
+            Product product = await _productQueryRepository.GetByIdAsync(id);
+
+            //foreach (var r in result)
+            //{
+            //    product.ProductImageFiles.Add(new()
+            //    {
+            //        FileName = r.fileName,
+            //        Path = r.pathOrContainerName,
+            //        Storage = _storageService.StorageName,
+            //        Products = new List<Product>() { product }
+            //    });
+            //}
+
+            await _productImageFileCommandRepository.AddRangeAsync(result.Select(r => new ProductImageFile
             {
-                FileName = x.fileName,
-                Path = x.pathOrContainerName,
-                Storage = _storageService.StorageName
+                FileName = r.fileName,
+                Path = r.pathOrContainerName,
+                Storage = _storageService.StorageName,
+                Products = new List<Product>() { product }
             }).ToList());
 
             await _productImageFileCommandRepository.SaveAsync();
 
-
-            // return Ok(result);
             return Ok();
         }
 

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NetXAngularPG.Persistance.Contexts;
 
@@ -11,9 +12,11 @@ using NetXAngularPG.Persistance.Contexts;
 namespace NetXAngularPG.Persistance.Migrations
 {
     [DbContext(typeof(NetXAngularPGDbContext))]
-    partial class NetXAngularPGDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230407231942_productFiles")]
+    partial class productFiles
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -137,6 +140,9 @@ namespace NetXAngularPG.Persistance.Migrations
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<Guid?>("ProductImageFileId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<int>("Stock")
                         .HasColumnType("int");
 
@@ -144,6 +150,8 @@ namespace NetXAngularPG.Persistance.Migrations
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ProductImageFileId");
 
                     b.ToTable("Products");
                 });
@@ -161,21 +169,6 @@ namespace NetXAngularPG.Persistance.Migrations
                     b.HasIndex("ProductsId");
 
                     b.ToTable("OrderProduct");
-                });
-
-            modelBuilder.Entity("ProductProductImageFile", b =>
-                {
-                    b.Property<Guid>("ProductImageFilesId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("ProductsId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("ProductImageFilesId", "ProductsId");
-
-                    b.HasIndex("ProductsId");
-
-                    b.ToTable("ProductProductImageFile");
                 });
 
             modelBuilder.Entity("NetXAngularPG.Domain.Entities.InvoiceFile", b =>
@@ -203,6 +196,13 @@ namespace NetXAngularPG.Persistance.Migrations
                     b.Navigation("Customer");
                 });
 
+            modelBuilder.Entity("NetXAngularPG.Domain.Entities.Product", b =>
+                {
+                    b.HasOne("NetXAngularPG.Domain.Entities.ProductImageFile", null)
+                        .WithMany("Products")
+                        .HasForeignKey("ProductImageFileId");
+                });
+
             modelBuilder.Entity("OrderProduct", b =>
                 {
                     b.HasOne("NetXAngularPG.Domain.Entities.Order", null)
@@ -218,24 +218,14 @@ namespace NetXAngularPG.Persistance.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("ProductProductImageFile", b =>
-                {
-                    b.HasOne("NetXAngularPG.Domain.Entities.ProductImageFile", null)
-                        .WithMany()
-                        .HasForeignKey("ProductImageFilesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("NetXAngularPG.Domain.Entities.Product", null)
-                        .WithMany()
-                        .HasForeignKey("ProductsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("NetXAngularPG.Domain.Entities.Customer", b =>
                 {
                     b.Navigation("Orders");
+                });
+
+            modelBuilder.Entity("NetXAngularPG.Domain.Entities.ProductImageFile", b =>
+                {
+                    b.Navigation("Products");
                 });
 #pragma warning restore 612, 618
         }

@@ -1,10 +1,11 @@
 ﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using NetXAngularPG.Application.Abstractions.Storage.Local;
+using System.IO;
 
 namespace NetXAngularPG.Infrastructure.Services.Storage.Local
 {
-    public class LocalStorage : ILocalStorage
+    public class LocalStorage :  Storage,ILocalStorage
     {
 
         private readonly IWebHostEnvironment _webHostEnvironment;
@@ -36,10 +37,10 @@ namespace NetXAngularPG.Infrastructure.Services.Storage.Local
 
             foreach (IFormFile file in files)
             {
+                string fileNewName = await FileRenameAsync(pathOrContainerName, file.Name, HasFile);
 
-                await CopyFileAsync($"{uploadPath}\\{file.Name}", file);
-                datas.Add((file.Name, $"{pathOrContainerName}\\{file.Name}"));
-
+                await CopyFileAsync($"{uploadPath}\\{fileNewName}", file);
+                datas.Add((fileNewName, $"{pathOrContainerName}\\{fileNewName}"));
             }
 
 

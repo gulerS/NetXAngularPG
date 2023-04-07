@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NetXAngularPG.Persistance.Contexts;
 
@@ -11,9 +12,11 @@ using NetXAngularPG.Persistance.Contexts;
 namespace NetXAngularPG.Persistance.Migrations
 {
     [DbContext(typeof(NetXAngularPGDbContext))]
-    partial class NetXAngularPGDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230407233957_productFiles2")]
+    partial class productFiles2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -165,15 +168,15 @@ namespace NetXAngularPG.Persistance.Migrations
 
             modelBuilder.Entity("ProductProductImageFile", b =>
                 {
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid>("ProductImageFilesId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("ProductsId")
-                        .HasColumnType("uniqueidentifier");
+                    b.HasKey("ProductId", "ProductImageFilesId");
 
-                    b.HasKey("ProductImageFilesId", "ProductsId");
-
-                    b.HasIndex("ProductsId");
+                    b.HasIndex("ProductImageFilesId");
 
                     b.ToTable("ProductProductImageFile");
                 });
@@ -220,15 +223,15 @@ namespace NetXAngularPG.Persistance.Migrations
 
             modelBuilder.Entity("ProductProductImageFile", b =>
                 {
-                    b.HasOne("NetXAngularPG.Domain.Entities.ProductImageFile", null)
+                    b.HasOne("NetXAngularPG.Domain.Entities.Product", null)
                         .WithMany()
-                        .HasForeignKey("ProductImageFilesId")
+                        .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("NetXAngularPG.Domain.Entities.Product", null)
+                    b.HasOne("NetXAngularPG.Domain.Entities.ProductImageFile", null)
                         .WithMany()
-                        .HasForeignKey("ProductsId")
+                        .HasForeignKey("ProductImageFilesId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
