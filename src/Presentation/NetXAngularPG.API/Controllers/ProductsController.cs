@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using NetXAngularPG.Application.Abstractions.Storage;
 using NetXAngularPG.Application.Repositories;
 using NetXAngularPG.Application.RequestParameters;
@@ -23,6 +24,7 @@ namespace NetXAngularPG.API.Controllers
         readonly private IInvoiceFileQueryRepository _invoiceFileQueryRepository;
         readonly private IInvoiceFileCommandRepository _invoiceFileCommandRepository;
         readonly private IStorageService _storageService;
+        readonly private IConfiguration _configuration;
 
         public ProductController(
             IProductCommandRepository productCommandRepository,
@@ -35,7 +37,8 @@ namespace NetXAngularPG.API.Controllers
             IProductImageFileQueryRepository productImageFileQueryRepository,
             IInvoiceFileQueryRepository invoiceFileQueryRepository,
             IInvoiceFileCommandRepository invoiceFileCommandRepository,
-            IStorageService storageService)
+            IStorageService storageService,
+            IConfiguration configuration)
         {
             _productCommandRepository = productCommandRepository;
             _productQueryRepository = productQueryRepository;
@@ -48,6 +51,7 @@ namespace NetXAngularPG.API.Controllers
             _invoiceFileQueryRepository = invoiceFileQueryRepository;
             _invoiceFileCommandRepository = invoiceFileCommandRepository;
             _storageService = storageService;
+            _configuration = configuration;
         }
 
         [HttpGet]
@@ -117,5 +121,39 @@ namespace NetXAngularPG.API.Controllers
             return Ok();
         }
 
+
+
+
+
+        [HttpGet("[action]/{id}")]
+        public async Task<IActionResult> GetProductImages(Guid id)
+        {
+            var product = await _productQueryRepository.Table.Include(p => p.ProductImageFiles).FirstOrDefaultAsync(x => x.Id == id);
+
+
+
+            return Ok(product?.ProductImageFiles.Select(x => new
+            {
+                Id = x.Id,
+                Path = $"{_configuration["BaseStorageUrl"]}/{x.Path}",
+                FileName = x.FileName
+            }));
+        }
+
+        [HttpDelete("[action]/{id}")]
+        public async Task<IActionResult> DeleteProductImage(Guid id, Guid imageId)
+        {
+            var product = await _productQueryRepository.Table.Include(p => p.ProductImageFiles).FirstOrDefaultAsync(x => x.Id == id);
+
+           ProductImageFile productImageFile = product.ProductImageFiles.FirstOrDefault(x => x.Id == imageId);
+
+            product.ProductImageFiles.Remove(productImageFile);
+
+            _productCommandRepository.SaveAsync();  
+
+
+
+            return Ok();
+        }
     }
 }
