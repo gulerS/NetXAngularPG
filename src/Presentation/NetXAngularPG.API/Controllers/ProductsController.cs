@@ -1,9 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using MediatR;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NetXAngularPG.Application.Abstractions.Storage;
+using NetXAngularPG.Application.Features.Commands.Product.CreateProduct;
+using NetXAngularPG.Application.Features.Queries.Product.GetAllProduct;
 using NetXAngularPG.Application.Repositories;
 using NetXAngularPG.Application.RequestParameters;
 using NetXAngularPG.Domain.Entities;
+using System.Net;
 
 namespace NetXAngularPG.API.Controllers
 {
@@ -26,6 +30,8 @@ namespace NetXAngularPG.API.Controllers
         readonly private IStorageService _storageService;
         readonly private IConfiguration _configuration;
 
+        readonly IMediator _mediator;
+
         public ProductController(
             IProductCommandRepository productCommandRepository,
             IProductQueryRepository productQueryRepository,
@@ -38,7 +44,8 @@ namespace NetXAngularPG.API.Controllers
             IInvoiceFileQueryRepository invoiceFileQueryRepository,
             IInvoiceFileCommandRepository invoiceFileCommandRepository,
             IStorageService storageService,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            IMediator mediator)
         {
             _productCommandRepository = productCommandRepository;
             _productQueryRepository = productQueryRepository;
@@ -52,33 +59,30 @@ namespace NetXAngularPG.API.Controllers
             _invoiceFileCommandRepository = invoiceFileCommandRepository;
             _storageService = storageService;
             _configuration = configuration;
+            _mediator = mediator;
         }
 
         [HttpGet]
-        public async Task<IActionResult> Get([FromQuery] Pagination pagination)
+        public async Task<IActionResult> Get([FromQuery] GetAllProductQueryRequest getAllProductQueryRequest)
         {
-            var totalCount = _productQueryRepository.GetAll(false).Count();
-            var products = _productQueryRepository.GetAll(false).Skip(pagination.Page * pagination.Size).Take(pagination.Size).Select(p => new
-            {
-                p.Id,
-                p.Name,
-                p.Stock,
-                p.Price,
-                p.CreatedDate,
-                p.UpdateDate
-            }).ToList();
+            GetAllProductQueryResponse response = await _mediator.Send(getAllProductQueryRequest);
 
-            return Ok(new
-            {
-                totalCount,
-                products
-            });
+            return Ok(response);
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(string id)
         {
             return Ok(await _productQueryRepository.GetByIdAsync(id, false));
+        }
+
+
+
+        [HttpPost]
+        public async Task<IActionResult> Post(CreateProductCommandRequest createProductCommandRequest)
+        {
+            CreateProductCommandResponse response = await _mediator.Send(createProductCommandRequest);
+            return StatusCode((int)HttpStatusCode.Created);
         }
 
 
@@ -145,11 +149,11 @@ namespace NetXAngularPG.API.Controllers
         {
             var product = await _productQueryRepository.Table.Include(p => p.ProductImageFiles).FirstOrDefaultAsync(x => x.Id == id);
 
-           ProductImageFile productImageFile = product.ProductImageFiles.FirstOrDefault(x => x.Id == imageId);
+            ProductImageFile productImageFile = product.ProductImageFiles.FirstOrDefault(x => x.Id == imageId);
 
             product.ProductImageFiles.Remove(productImageFile);
 
-            _productCommandRepository.SaveAsync();  
+            _productCommandRepository.SaveAsync();
 
 
 
