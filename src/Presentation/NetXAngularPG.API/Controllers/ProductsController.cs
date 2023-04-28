@@ -3,7 +3,13 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NetXAngularPG.Application.Abstractions.Storage;
 using NetXAngularPG.Application.Features.Commands.Product.CreateProduct;
+using NetXAngularPG.Application.Features.Commands.Product.RemoveProduct;
+using NetXAngularPG.Application.Features.Commands.Product.UpdateProduct;
+using NetXAngularPG.Application.Features.Commands.ProductImageFile.RemoveProductImage;
+using NetXAngularPG.Application.Features.Commands.ProductImageFile.UploadProductImage;
 using NetXAngularPG.Application.Features.Queries.Product.GetAllProduct;
+using NetXAngularPG.Application.Features.Queries.Product.GetByIdProduct;
+using NetXAngularPG.Application.Features.Queries.ProductImageFile.GetProductImages;
 using NetXAngularPG.Application.Repositories;
 using NetXAngularPG.Application.RequestParameters;
 using NetXAngularPG.Domain.Entities;
@@ -16,49 +22,10 @@ namespace NetXAngularPG.API.Controllers
     [ApiController]
     public class ProductController : ControllerBase
     {
-        readonly private IProductCommandRepository _productCommandRepository;
-        readonly private IProductQueryRepository _productQueryRepository;
-        private readonly IWebHostEnvironment _webHostEnvironment;
-
-
-        readonly private IFileCommandRepository _fileCommandRepository;
-        readonly private IFileQueryRepository _fileQueryRepository;
-        readonly private IProductImageFileCommandRepository _productImageFileCommandRepository;
-        readonly private IProductImageFileQueryRepository _productImageFileQueryRepository;
-        readonly private IInvoiceFileQueryRepository _invoiceFileQueryRepository;
-        readonly private IInvoiceFileCommandRepository _invoiceFileCommandRepository;
-        readonly private IStorageService _storageService;
-        readonly private IConfiguration _configuration;
-
         readonly IMediator _mediator;
 
-        public ProductController(
-            IProductCommandRepository productCommandRepository,
-            IProductQueryRepository productQueryRepository,
-            IWebHostEnvironment webHostEnvironment,
-
-            IFileCommandRepository fileCommandRepository,
-            IFileQueryRepository fileQueryRepository,
-            IProductImageFileCommandRepository productImageFileCommandRepository,
-            IProductImageFileQueryRepository productImageFileQueryRepository,
-            IInvoiceFileQueryRepository invoiceFileQueryRepository,
-            IInvoiceFileCommandRepository invoiceFileCommandRepository,
-            IStorageService storageService,
-            IConfiguration configuration,
-            IMediator mediator)
+        public ProductController(IMediator mediator)
         {
-            _productCommandRepository = productCommandRepository;
-            _productQueryRepository = productQueryRepository;
-            _webHostEnvironment = webHostEnvironment;
-
-            _fileCommandRepository = fileCommandRepository;
-            _fileQueryRepository = fileQueryRepository;
-            _productImageFileCommandRepository = productImageFileCommandRepository;
-            _productImageFileQueryRepository = productImageFileQueryRepository;
-            _invoiceFileQueryRepository = invoiceFileQueryRepository;
-            _invoiceFileCommandRepository = invoiceFileCommandRepository;
-            _storageService = storageService;
-            _configuration = configuration;
             _mediator = mediator;
         }
 
@@ -66,17 +33,15 @@ namespace NetXAngularPG.API.Controllers
         public async Task<IActionResult> Get([FromQuery] GetAllProductQueryRequest getAllProductQueryRequest)
         {
             GetAllProductQueryResponse response = await _mediator.Send(getAllProductQueryRequest);
-
             return Ok(response);
         }
 
-        [HttpGet("{id}")]
-        public async Task<IActionResult> Get(string id)
+        [HttpGet("{Id}")]
+        public async Task<IActionResult> Get([FromRoute] GetByIdProductQueryRequest getByIdProductQueryRequest)
         {
-            return Ok(await _productQueryRepository.GetByIdAsync(id, false));
+            GetByIdProductQueryResponse response = await _mediator.Send(getByIdProductQueryRequest);
+            return Ok(response);
         }
-
-
 
         [HttpPost]
         public async Task<IActionResult> Post(CreateProductCommandRequest createProductCommandRequest)
@@ -85,79 +50,45 @@ namespace NetXAngularPG.API.Controllers
             return StatusCode((int)HttpStatusCode.Created);
         }
 
-
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(string id)
+        [HttpPut]
+        public async Task<IActionResult> Put([FromBody] UpdateProductCommandRequest updateProductCommandRequest)
         {
-            await _productCommandRepository.RemoveAsync(id);
-            await _productCommandRepository.SaveAsync();
+            UpdateProductCommandResponse response = await _mediator.Send(updateProductCommandRequest);
             return Ok();
         }
+
+        [HttpDelete("{Id}")]
+        public async Task<IActionResult> Delete([FromRoute] RemoveProductCommandRequest removeProductCommandRequest)
+        {
+            RemoveProductCommandResponse response = await _mediator.Send(removeProductCommandRequest);
+            return Ok();
+        }
+
         [HttpPost("[action]")]
-        public async Task<IActionResult> Upload(string id)
+        public async Task<IActionResult> Upload([FromQuery] UploadProductImageCommandRequest uploadProductImageCommandRequest)
         {
-            List<(string fileName, string pathOrContainerName)> result = await _storageService.UploadAsync("photo-images", Request.Form.Files);
-
-
-            Product product = await _productQueryRepository.GetByIdAsync(id);
-
-            //foreach (var r in result)
-            //{
-            //    product.ProductImageFiles.Add(new()
-            //    {
-            //        FileName = r.fileName,
-            //        Path = r.pathOrContainerName,
-            //        Storage = _storageService.StorageName,
-            //        Products = new List<Product>() { product }
-            //    });
-            //}
-
-            await _productImageFileCommandRepository.AddRangeAsync(result.Select(r => new ProductImageFile
-            {
-                FileName = r.fileName,
-                Path = r.pathOrContainerName,
-                Storage = _storageService.StorageName,
-                Products = new List<Product>() { product }
-            }).ToList());
-
-            await _productImageFileCommandRepository.SaveAsync();
-
+            uploadProductImageCommandRequest.Files = Request.Form.Files;
+            UploadProductImageCommandResponse response = await _mediator.Send(uploadProductImageCommandRequest);
             return Ok();
         }
-
-
-
-
 
         [HttpGet("[action]/{id}")]
-        public async Task<IActionResult> GetProductImages(Guid id)
+        public async Task<IActionResult> GetProductImages([FromRoute] GetProductImagesQueryRequest getProductImagesQueryRequest)
         {
-            var product = await _productQueryRepository.Table.Include(p => p.ProductImageFiles).FirstOrDefaultAsync(x => x.Id == id);
-
-
-
-            return Ok(product?.ProductImageFiles.Select(x => new
-            {
-                Id = x.Id,
-                Path = $"{_configuration["BaseStorageUrl"]}/{x.Path}",
-                FileName = x.FileName
-            }));
+            List<GetProductImagesQueryResponse> response = await _mediator.Send(getProductImagesQueryRequest);
+            return Ok(response);
         }
 
         [HttpDelete("[action]/{id}")]
-        public async Task<IActionResult> DeleteProductImage(Guid id, Guid imageId)
+        public async Task<IActionResult> DeleteProductImage([FromRoute] RemoveProductImageCommandRequest removeProductImageCommandRequest, [FromQuery] string imageId)
         {
-            var product = await _productQueryRepository.Table.Include(p => p.ProductImageFiles).FirstOrDefaultAsync(x => x.Id == id);
+            //Ders sonrası not !
+            //Burada RemoveProductImageCommandRequest sınıfı içerisindeki ImageId property'sini de 'FromQuery' attribute'u ile işaretleyebilirdik!
 
-            ProductImageFile productImageFile = product.ProductImageFiles.FirstOrDefault(x => x.Id == imageId);
-
-            product.ProductImageFiles.Remove(productImageFile);
-
-            _productCommandRepository.SaveAsync();
-
-
-
+            removeProductImageCommandRequest.ImageId = imageId;
+            RemoveProductImageCommandResponse response = await _mediator.Send(removeProductImageCommandRequest);
             return Ok();
         }
+
     }
 }
