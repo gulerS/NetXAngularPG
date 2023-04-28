@@ -1,7 +1,5 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using NetXAngularPG.Application.Abstractions.Storage;
 using NetXAngularPG.Application.Features.Commands.Product.CreateProduct;
 using NetXAngularPG.Application.Features.Commands.Product.RemoveProduct;
 using NetXAngularPG.Application.Features.Commands.Product.UpdateProduct;
@@ -10,9 +8,6 @@ using NetXAngularPG.Application.Features.Commands.ProductImageFile.UploadProduct
 using NetXAngularPG.Application.Features.Queries.Product.GetAllProduct;
 using NetXAngularPG.Application.Features.Queries.Product.GetByIdProduct;
 using NetXAngularPG.Application.Features.Queries.ProductImageFile.GetProductImages;
-using NetXAngularPG.Application.Repositories;
-using NetXAngularPG.Application.RequestParameters;
-using NetXAngularPG.Domain.Entities;
 using System.Net;
 
 namespace NetXAngularPG.API.Controllers
